@@ -1,4 +1,4 @@
-FROM hasura/graphql-engine:v2.0.4
+FROM hasura/graphql-engine:v2.12.0
 
 # Enable the console
 ENV HASURA_GRAPHQL_ENABLE_CONSOLE=true
@@ -6,25 +6,13 @@ ENV HASURA_GRAPHQL_ENABLE_CONSOLE=true
 # Enable debugging mode. It should be disabled in production.
 ENV HASURA_GRAPHQL_DEV_MODE=true
 
+# Heroku only allows to install extensions in the heroku_ext schema
+ENV HASURA_GRAPHQL_METADATA_DATABASE_EXTENSIONS_SCHEMA=heroku_ext
+
 # Heroku hobby tier PG has few limitations including 20 max connections
 # https://devcenter.heroku.com/articles/heroku-postgres-plans#hobby-tier
 ENV HASURA_GRAPHQL_PG_CONNECTIONS=15
 
-# Change $DATABASE_URL to your heroku postgres URL if you're not using
-# the primary postgres instance in your app
-CMD graphql-engine \
-    --database-url $DATABASE_URL \
+CMD HASURA_GRAPHQL_METADATA_DATABASE_URL=$DATABASE_URL graphql-engine \
     serve \
     --server-port $PORT
-
-## Comment the command above and use the command below to
-## enable an access-key and an auth-hook
-## Recommended that you set the access-key as a environment variable in heroku
-#CMD graphql-engine \
-#    --database-url $DATABASE_URL \
-#    serve \
-#    --server-port $PORT \
-#    --access-key XXXXX \
-#    --auth-hook https://myapp.com/hasura-webhook 
-#
-# Console can be enable/disabled by the env var HASURA_GRAPHQL_ENABLE_CONSOLE
